@@ -1,0 +1,80 @@
+version: '3.8'
+
+networks:
+  corpamag-net:
+    driver: bridge
+
+volumes:
+  db_data:
+  file_data:
+
+services:
+
+  web-server:
+    build: ./docker/web
+    container_name: corpamag-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - corpamag-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db-server:
+    build: ./docker/database
+    container_name: corpamag-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: corpamag_db
+      POSTGRES_USER: corpamag_admin
+      POSTGRES_PASSWORD: Corpamag2024!
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - corpamag-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corpamag_admin -d corpamag_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  file-server:
+    build: ./docker/fileserver
+    container_name: corpamag-files
+    restart: unless-stopped
+    volumes:
+      - file_data:/srv/samba/documentos
+    networks:
+      - corpamag-net
+    ports:
+      - "445:445"
+
+  ntp-server:
+    build: ./docker/ntp
+    container_name: corpamag-ntp
+    restart: unless-stopped
+    cap_add:
+      - SYS_TIME
+    networks:
+      - corpamag-net
+    ports:
+      - "123:123/udp"
+
+  ssh-server:
+    image: linuxserver/openssh-server:latest
+    container_name: corpamag-ssh
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - PASSWORD_ACCESS=true
+      - USER_PASSWORD=Admin2024!
+      - USER_NAME=corpamag_admin
+    ports:
+      - "2222:2222"
+    networks:
+      - corpamag-net
