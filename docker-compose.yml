@@ -1,15 +1,29 @@
 version: '3.8'
 
+# ============================================================
+# Docker Compose - Infraestructura TI CORPAMAG
+# Descripción: Orquestación de servicios institucionales
+# Autor: Juan Camilo Lopez
+# ============================================================
+
 networks:
+  # Red interna compartida entre todos los contenedores
   corpamag-net:
     driver: bridge
 
 volumes:
+  # Volumen persistente para datos de PostgreSQL
   db_data:
+  # Volumen persistente para archivos compartidos Samba
   file_data:
 
 services:
 
+  # ------------------------------------------------------------
+  # SERVICIO 1: Servidor Web - Nginx
+  # Función: Portal institucional CORPAMAG
+  # Puerto: 80 (HTTP)
+  # ------------------------------------------------------------
   web-server:
     build: ./docker/web
     container_name: corpamag-web
@@ -24,6 +38,11 @@ services:
       timeout: 10s
       retries: 3
 
+  # ------------------------------------------------------------
+  # SERVICIO 2: Base de Datos - PostgreSQL 15
+  # Función: Almacena licencias ambientales y expedientes
+  # Puerto: 5432 (solo red interna, no expuesto al host)
+  # ------------------------------------------------------------
   db-server:
     build: ./docker/database
     container_name: corpamag-db
@@ -33,6 +52,7 @@ services:
       POSTGRES_USER: corpamag_admin
       POSTGRES_PASSWORD: Corpamag2024!
     volumes:
+      # Datos persistentes fuera del contenedor
       - db_data:/var/lib/postgresql/data
     networks:
       - corpamag-net
@@ -42,6 +62,11 @@ services:
       timeout: 10s
       retries: 5
 
+  # ------------------------------------------------------------
+  # SERVICIO 3: Servidor de Archivos - Samba
+  # Función: Repositorio de documentos internos CORPAMAG
+  # Puerto: 445 (SMB)
+  # ------------------------------------------------------------
   file-server:
     build: ./docker/fileserver
     container_name: corpamag-files
@@ -53,17 +78,28 @@ services:
     ports:
       - "445:445"
 
+  # ------------------------------------------------------------
+  # SERVICIO 4: Servidor NTP - Chrony
+  # Función: Sincronización horaria para logs y auditorías
+  # Puerto: 123/UDP
+  # ------------------------------------------------------------
   ntp-server:
     build: ./docker/ntp
     container_name: corpamag-ntp
     restart: unless-stopped
     cap_add:
+      # Permiso necesario para modificar el reloj del sistema
       - SYS_TIME
     networks:
       - corpamag-net
     ports:
       - "123:123/udp"
 
+  # ------------------------------------------------------------
+  # SERVICIO 5: Acceso Remoto - OpenSSH
+  # Función: Acceso seguro para administradores y funcionarios
+  # Puerto: 2222 (SSH no estándar por seguridad)
+  # ------------------------------------------------------------
   ssh-server:
     image: linuxserver/openssh-server:latest
     container_name: corpamag-ssh
