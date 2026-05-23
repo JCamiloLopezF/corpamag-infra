@@ -19,3 +19,28 @@
    → Solución: verificar desde el sistema host
 
 **Resultado:** 5 contenedores activos y verificados exitosamente.
+
+## Punto 4 — RAID y LVM
+**Fecha:** 23/05/2026
+
+**Implementación:**
+- RAID 1 (espejo) simulado con loop devices sobre archivos 
+  de 512MB en /opt/corpamag-discos/
+- Volume Group: corpamag-vg sobre /dev/md0
+- 3 Logical Volumes creados y montados:
+  - lv-database → /data/database (150MB) - Para PostgreSQL
+  - lv-archivos → /data/archivos (200MB) - Para Samba
+  - lv-backups  → /data/backups (100MB)  - Para backups
+
+**Justificación técnica:**
+- RAID 1 protege contra pérdida de datos de licencias 
+  ambientales ante fallo de disco
+- LVM permite redimensionar volúmenes sin detener servicios
+
+**Problemas encontrados:**
+1. /tmp estaba al 100% de capacidad
+   → Solución: cambiar ruta de discos simulados a /opt/
+2. mdadm no estaba instalado
+   → Solución: apt-get install -y mdadm lvm2
+
+**Resultado:** RAID 1 activo, 3 LVs montados y verificados.
