@@ -44,3 +44,34 @@
    → Solución: apt-get install -y mdadm lvm2
 
 **Resultado:** RAID 1 activo, 3 LVs montados y verificados.
+
+
+## Punto 5 — Seguridad
+**Fecha:** 23/05/2026
+
+**Firewall (iptables):**
+- Política por defecto: DROP en INPUT y FORWARD
+- Puertos permitidos: 80, 443, 2222, 445, 123/udp
+- PostgreSQL (5432) restringido solo a red interna Docker
+- Log de paquetes rechazados activo
+- Reglas guardadas permanentemente en /etc/iptables/rules.v4
+
+**Usuarios y grupos creados:**
+- admin_ti → grupo corpamag_admins (sudo)
+- func_ambiental → grupo corpamag_funcionarios
+- auditor → grupo corpamag_readonly
+
+**Permisos especiales aplicados:**
+- STICKY BIT en /srv/corpamag/compartido (drwxrwxrwt)
+  → Usuarios no pueden borrar archivos de otros
+- SETGID en /srv/corpamag/documentos (drwxrws---)
+  → Archivos nuevos heredan grupo corpamag_funcionarios
+- SETUID en backup_runner.sh (-rwsr-x---)
+  → Se ejecuta con privilegios de root
+
+**Problemas encontrados:**
+1. ls -l sobre archivo SETUID denegaba permiso
+   → Solución: usar sudo ls -l
+
+**Resultado:** Firewall activo y permisos especiales 
+verificados exitosamente.
