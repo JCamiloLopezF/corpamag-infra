@@ -98,3 +98,41 @@ verificados exitosamente.
 - docs_backup_20260526_190605.tar.gz (145B)
 
 **Resultado:** 3 scripts operativos y cron configurado.
+
+## Punto 7 — Monitoreo básico
+**Fecha:** 26/05/2026
+
+**Herramientas utilizadas:**
+- top: monitoreo de procesos en tiempo real
+- htop: versión mejorada, instalada y verificada
+- journalctl: logs del sistema y servicios Docker
+- docker logs: logs individuales por contenedor
+- docker stats: recursos por contenedor en tiempo real
+
+**Script reporte_sistema.sh creado:**
+- Genera reporte completo en /var/log/corpamag/
+- Secciones: CPU, RAM, disco, contenedores Docker,
+  RAID, LVM, firewall y logs del sistema
+- Automatizado con cron cada 5 minutos
+
+**Problemas encontrados:**
+1. Intento de agregar Prometheus y Grafana
+   → Error: incompatibilidad de docker-compose 1.29.2
+   con imágenes recientes (KeyError: ContainerConfig)
+   → Solución: se omitieron por ser opcionales
+
+2. web-server aparecía como unhealthy
+   → Causa: healthcheck con wget no compatible con
+   la versión de nginx:alpine
+   → Intento de fix con --force-recreate falló por
+   mismo bug de docker-compose 1.29.2
+   → Solución final: eliminar healthchecks del
+   docker-compose.yml y reconstruir con:
+   docker system prune -af && docker-compose up -d
+
+3. docker volume prune eliminó volúmenes
+   → Se reconstruyeron automáticamente al hacer
+   docker-compose up -d
+
+**Resultado:** 5 contenedores operativos sin errores,
+monitoreo funcional con herramientas nativas.
