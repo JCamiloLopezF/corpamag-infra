@@ -32,11 +32,6 @@ services:
       - "80:80"
     networks:
       - corpamag-net
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   # ------------------------------------------------------------
   # SERVICIO 2: Base de Datos - PostgreSQL 15
@@ -56,11 +51,6 @@ services:
       - db_data:/var/lib/postgresql/data
     networks:
       - corpamag-net
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U corpamag_admin -d corpamag_db"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   # ------------------------------------------------------------
   # SERVICIO 3: Servidor de Archivos - Samba
