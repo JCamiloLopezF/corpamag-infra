@@ -75,3 +75,26 @@
 
 **Resultado:** Firewall activo y permisos especiales 
 verificados exitosamente.
+
+## Punto 6 — Scripts Bash
+**Fecha:** 26/05/2026
+
+**Scripts creados:**
+- backup.sh: respalda BD PostgreSQL, documentos y 
+  configuraciones Docker en /data/backups/
+  Retención: 7 días, limpieza automática
+- monitor.sh: verifica CPU, RAM, disco, contenedores
+  Docker, RAID, LVM y firewall
+- deploy.sh: despliegue completo automatizado de toda
+  la infraestructura CORPAMAG
+
+**Automatización con cron:**
+- Monitoreo: cada 5 minutos
+- Backup: diario a las 2:00 AM
+
+**Archivos de backup generados:**
+- db_backup_20260526_190605.sql (5.2KB)
+- docker-compose_20260526_190605.yml (3.4KB)
+- docs_backup_20260526_190605.tar.gz (145B)
+
+**Resultado:** 3 scripts operativos y cron configurado.
