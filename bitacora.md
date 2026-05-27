@@ -136,3 +136,38 @@ verificados exitosamente.
 
 **Resultado:** 5 contenedores operativos sin errores,
 monitoreo funcional con herramientas nativas.
+
+## Punto 8 — Alta Disponibilidad
+**Fecha:** 26/05/2026
+
+**Implementación:**
+- Dos instancias del servidor web (corpamag-web y corpamag-web2)
+- Balanceador de carga Nginx (corpamag-lb) en puerto 80
+- Algoritmo Round-Robin distribuyendo tráfico entre ambas
+- Endpoint /lb-status para verificar estado del balanceador
+
+**Prueba de fallo realizada:**
+- Se detuvo corpamag-web con docker stop
+- El sitio web siguió respondiendo gracias a corpamag-web2
+- Se restauró corpamag-web con docker start
+- Alta disponibilidad demostrada exitosamente
+
+**Script recuperacion.sh:**
+- Verifica y recupera automáticamente:
+  - Contenedores Docker caídos
+  - RAID desmontado
+  - Volúmenes LVM desmontados
+  - Reglas de firewall perdidas
+
+**Estrategia de recuperación ante fallos:**
+
+| Escenario | Estrategia | RTO |
+|---|---|---|
+| Servidor web cae | Web2 sigue activo via LB | Inmediato |
+| Contenedor caído | recuperacion.sh lo reinicia | < 30 seg |
+| Fallo de disco | RAID 1 mantiene operación | Inmediato |
+| Pérdida de datos | Restore desde backup diario | < 15 min |
+| Sistema completo | deploy.sh reconstruye todo | < 10 min |
+
+**Resultado:** Alta disponibilidad demostrada en práctica
+con 7 contenedores operativos y recuperación automatizada.
