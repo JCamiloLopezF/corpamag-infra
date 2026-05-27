@@ -20,18 +20,42 @@ volumes:
 services:
 
   # ------------------------------------------------------------
-  # SERVICIO 1: Servidor Web - Nginx
-  # Función: Portal institucional CORPAMAG
-  # Puerto: 80 (HTTP)
+  # SERVICIO 1a: Servidor Web 1 - Nginx (instancia primaria)
   # ------------------------------------------------------------
   web-server:
     build: ./docker/web
     container_name: corpamag-web
     restart: unless-stopped
+    networks:
+      - corpamag-net
+
+  # ------------------------------------------------------------
+  # SERVICIO 1b: Servidor Web 2 - Nginx (instancia secundaria)
+  # Alta disponibilidad: si web-server cae, web2 sigue activo
+  # ------------------------------------------------------------
+  web-server2:
+    build: ./docker/web
+    container_name: corpamag-web2
+    restart: unless-stopped
+    networks:
+      - corpamag-net
+
+  # ------------------------------------------------------------
+  # SERVICIO 1c: Balanceador de carga - Nginx LB
+  # Distribuye tráfico entre web-server y web-server2
+  # Puerto: 80 (único punto de entrada)
+  # ------------------------------------------------------------
+  load-balancer:
+    build: ./docker/loadbalancer
+    container_name: corpamag-lb
+    restart: unless-stopped
     ports:
       - "80:80"
     networks:
       - corpamag-net
+    depends_on:
+      - web-server
+      - web-server2
 
   # ------------------------------------------------------------
   # SERVICIO 2: Base de Datos - PostgreSQL 15
